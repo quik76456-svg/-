@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "worker": "node -e \"import('./src/server/queue/worker').then(m=>{m.startWorkers();setInterval(()=>{},1<<30)})\""
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",

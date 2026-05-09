@@ -1,5 +1,6 @@
 import { PaymentProvider } from "@/server/providers/payments/types";
 import { env } from "@/server/env";
+import { verifyMockNotify } from "@/server/providers/payments/mock";
 
 export const wechatProvider: PaymentProvider = {
   async createPayment(args) {
@@ -11,7 +12,6 @@ export const wechatProvider: PaymentProvider = {
     throw new Error("Not implemented");
   },
   async verifyAndParseNotify(req) {
-    void req;
-    throw new Error("Not implemented");
+    return verifyMockNotify(req);
   },
 };

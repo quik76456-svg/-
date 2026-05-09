@@ -1,4 +1,5 @@
 import { db } from "@/server/db";
+import type { Prisma, PrismaClient } from "@prisma/client";
 
 export async function createOrder(userId: string, planId: string) {
   const plan = await db.plan.findUnique({ where: { id: planId } });
@@ -13,13 +14,14 @@ export async function markOrderPaid(
   provider: "ALIPAY" | "WECHAT",
   providerTradeNo: string,
   amountCny: number,
+  prisma: PrismaClient | Prisma.TransactionClient = db,
 ) {
-  const order = await db.order.findUnique({ where: { id: orderId } });
+  const order = await prisma.order.findUnique({ where: { id: orderId } });
   if (!order) throw new Error("order_not_found");
   if (order.amountCny !== amountCny) throw new Error("amount_mismatch");
   if (order.status === "PAID" || order.status === "FULFILLED") return order;
 
-  return db.order.update({
+  return prisma.order.update({
     where: { id: orderId },
     data: { status: "PAID", provider, providerTradeNo, paidAt: new Date() },
   });

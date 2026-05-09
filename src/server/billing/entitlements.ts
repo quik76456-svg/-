@@ -1,11 +1,16 @@
 import { db } from "@/server/db";
+import type { Prisma, PrismaClient } from "@prisma/client";
 
-export async function grantPlanEntitlement(userId: string, planId: string) {
-  const plan = await db.plan.findUnique({ where: { id: planId } });
+export async function grantPlanEntitlement(
+  userId: string,
+  planId: string,
+  prisma: PrismaClient | Prisma.TransactionClient = db,
+) {
+  const plan = await prisma.plan.findUnique({ where: { id: planId } });
   if (!plan) throw new Error("plan_not_found");
   const limits = plan.limitsJson as unknown as { generations?: unknown; exports?: unknown; jdCustomizations?: unknown };
 
-  return db.entitlement.create({
+  return prisma.entitlement.create({
     data: {
       userId,
       planId,
@@ -15,4 +20,3 @@ export async function grantPlanEntitlement(userId: string, planId: string) {
     },
   });
 }
-
