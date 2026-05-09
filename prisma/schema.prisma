@@ -1,0 +1,187 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum IdentityType {
+  GRAD
+  EXP_1_5
+}
+
+enum OrderStatus {
+  CREATED
+  PENDING_PAY
+  PAID
+  FULFILLED
+  REFUNDED
+}
+
+enum PaymentProvider {
+  ALIPAY
+  WECHAT
+}
+
+model User {
+  id          String        @id @default(cuid())
+  phone       String        @unique
+  createdAt   DateTime      @default(now())
+
+  resumes      Resume[]
+  orders       Order[]
+  sessions     AuthSession[]
+  entitlements Entitlement[]
+}
+
+model AuthSmsCode {
+  id        String   @id @default(cuid())
+  phone     String
+  codeHash  String
+  expiresAt DateTime
+  sentAt    DateTime @default(now())
+  ip        String?
+  scene     String
+
+  @@index([phone, scene])
+}
+
+model AuthSession {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenJti  String   @unique
+  createdAt DateTime @default(now())
+  revokedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model Resume {
+  id            String       @id @default(cuid())
+  userId        String
+  identityType  IdentityType
+  sourceFileKey String
+  parsedText    String?
+  parseStatus   String       @default("PENDING")
+  createdAt     DateTime     @default(now())
+
+  user      User        @relation(fields: [userId], references: [id])
+  sessions  QaSession[]
+  versions  ResumeVersion[]
+  diagnosis Diagnosis?
+
+  @@index([userId, createdAt])
+}
+
+model Diagnosis {
+  id        String   @id @default(cuid())
+  resumeId  String   @unique
+  score     Int
+  issuesJson Json
+  createdAt DateTime @default(now())
+
+  resume Resume @relation(fields: [resumeId], references: [id])
+}
+
+model QaSession {
+  id        String   @id @default(cuid())
+  resumeId  String
+  status    String   @default("ACTIVE")
+  startedAt DateTime @default(now())
+  endedAt   DateTime?
+
+  resume   Resume      @relation(fields: [resumeId], references: [id])
+  messages QaMessage[]
+  versions ResumeVersion[]
+}
+
+model QaMessage {
+  id        String   @id @default(cuid())
+  sessionId String
+  role      String
+  content   String
+  tokens    Int?
+  createdAt DateTime @default(now())
+
+  session QaSession @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId, createdAt])
+}
+
+model Plan {
+  id        String   @id @default(cuid())
+  name      String
+  limitsJson Json
+  amountCny Int
+  isActive  Boolean @default(true)
+  createdAt DateTime @default(now())
+
+  orders       Order[]
+  entitlements Entitlement[]
+}
+
+model Order {
+  id              String           @id @default(cuid())
+  userId          String
+  planId          String
+  amountCny       Int
+  status          OrderStatus      @default(CREATED)
+  provider        PaymentProvider?
+  providerTradeNo String?
+  createdAt       DateTime         @default(now())
+  paidAt          DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+  plan Plan @relation(fields: [planId], references: [id])
+
+  @@index([userId, createdAt])
+}
+
+model Entitlement {
+  id                       String   @id @default(cuid())
+  userId                   String
+  planId                   String
+  remainingGenerations     Int
+  remainingExports         Int
+  remainingJdCustomizations Int
+  expiresAt                DateTime?
+  createdAt                DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  plan Plan @relation(fields: [planId], references: [id])
+
+  @@index([userId, planId])
+}
+
+model ResumeVersion {
+  id                String   @id @default(cuid())
+  resumeId           String
+  sessionId          String?
+  versionJson        Json
+  templateFieldsJson Json
+  createdAt          DateTime @default(now())
+
+  resume  Resume      @relation(fields: [resumeId], references: [id])
+  session QaSession?  @relation(fields: [sessionId], references: [id])
+  exports Export[]
+
+  @@index([resumeId, createdAt])
+}
+
+model Export {
+  id            String   @id @default(cuid())
+  versionId     String
+  format        String
+  templateId    String
+  fileKey       String
+  downloadToken String   @unique
+  expiresAt     DateTime
+  createdAt     DateTime @default(now())
+
+  version ResumeVersion @relation(fields: [versionId], references: [id])
+
+  @@index([versionId, createdAt])
+}
