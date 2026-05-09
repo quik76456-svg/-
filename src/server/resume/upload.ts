@@ -1,6 +1,7 @@
 import { db } from "@/server/db";
 import { putObject } from "@/server/providers/storage/oss";
 import { resumeParseQueue } from "@/server/queue/queues";
+import { runParseJob } from "@/server/resume/parse";
 
 export type CreateResumeUploadArgs = {
   userId: string;
@@ -19,6 +20,7 @@ export async function createResumeUpload(args: CreateResumeUploadArgs) {
   });
 
   await resumeParseQueue.add("parse", { resumeId: resume.id });
+  if (process.env.NODE_ENV === "development") await runParseJob(resume.id);
 
   return { resumeId: resume.id, key };
 }

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "worker": "node -e \"import('./src/server/queue/worker').then(m=>{m.startWorkers();setInterval(()=>{},1<<30)})\""
+    "worker": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config -e \"import('./src/server/queue/worker').then(m=>{m.startWorkers();setInterval(()=>{},1<<30)})\""
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
@@ -15,6 +15,7 @@
     "ali-oss": "^6.23.0",
     "alipay-sdk": "^4.14.0",
     "bullmq": "^5.76.6",
+    "docxtemplater": "^3.68.7",
     "dotenv": "^17.4.2",
     "ioredis": "^5.10.1",
     "jose": "^6.2.3",
@@ -22,13 +23,16 @@
     "next": "16.2.6",
     "pdf-parse": "^2.4.5",
     "pg": "^8.20.0",
+    "pizzip": "^3.2.0",
     "prisma": "^7.8.0",
+    "proxy-agent": "^5.0.0",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "wechatpay-node-v3": "^2.2.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

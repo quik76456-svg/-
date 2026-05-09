@@ -3,6 +3,7 @@ import { env } from "@/server/env";
 import { db } from "@/server/db";
 
 export function generateCode() {
+  if (process.env.NODE_ENV !== "production") return "000000";
   return `${randomInt(0, 1000000)}`.padStart(6, "0");
 }
 
@@ -32,5 +33,7 @@ export async function sendLoginSms(phone: string, code: string) {
   void phone;
   void code;
 
-  throw new Error("Not implemented: integrate Aliyun SMS SDK send");
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("Not implemented: integrate Aliyun SMS SDK send");
+  }
 }

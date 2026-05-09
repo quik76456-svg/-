@@ -1,6 +1,6 @@
 import { db } from "@/server/db";
 import { getObject } from "@/server/providers/storage/oss";
-import pdfParse from "pdf-parse";
+import { PDFParse } from "pdf-parse";
 import mammoth from "mammoth";
 
 export async function parseResumeText(sourceFileKey: string) {
@@ -9,8 +9,9 @@ export async function parseResumeText(sourceFileKey: string) {
   const lower = sourceFileKey.toLowerCase();
   if (lower.endsWith(".txt")) return buffer.toString("utf-8");
   if (lower.endsWith(".pdf")) {
-    const parsed = await pdfParse(buffer);
-    return parsed.text;
+    const parser = new PDFParse({});
+    await parser.load(buffer);
+    return await parser.getText();
   }
   if (lower.endsWith(".docx")) {
     const out = await mammoth.extractRawText({ buffer });
