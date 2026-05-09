@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "worker": "DOTENV_CONFIG_PATH=.env.local node -r dotenv/config -e \"import('./src/server/queue/worker').then(m=>{m.startWorkers();setInterval(()=>{},1<<30)})\""
+    "worker": "DOTENV_CONFIG_PATH=.env.local tsx -r dotenv/config scripts/worker.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
@@ -42,6 +42,7 @@
     "eslint-config-next": "16.2.6",
     "playwright": "^1.59.1",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5",
     "vitest": "^4.1.5"
   },
